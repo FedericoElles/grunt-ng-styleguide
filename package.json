@@ -1,0 +1,18 @@
+{
+  "name": "grunt-ng-styleguide",
+  "version": "0.0.1",
+  "description": "Grunt task for checking style of AngularJS projects",
+  "scripts": {
+    "test": "grunt test"
+  },
+  "devDependencies": {
+  },
+  "keywords": [
+    "grunt",
+    "angular",
+    "angularjs"
+  ],
+  "author": {
+    "name": ""
+  }
+}

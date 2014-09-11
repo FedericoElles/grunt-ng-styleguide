@@ -1,60 +1,61 @@
 'use strict';
 
-//var ngmin = require('ngmin');
+/**
+ * tabHandler service - allows it to register callbacks which
+ * are called in case the selected tab is changed
+ */
+function tabHandlerService () {
+  /*jshint -W004 */
+  var tabHandlerService = {};
+  /*jshint +W004 */
 
-module.exports = function (grunt) {
+  var requiredFunctions = ['enterView', 'leaveView', 'focus'],
+      handler = {}, //store handlers
+      defaultHandler;
 
-  grunt.registerMultiTask('ngstyle', 'Checks AngularJS Styleguide', function () {
+  var verifyTabObject = function(tabObject){
+    var getType = {};
 
-    //grunt.log.writeln('ngstyle ' + grunt.log.wordlist(this.files.map(function (file) {
-    //  return file.src;
-    //})));
-    var files = this.filesSrc;
-
-    files.forEach(function (file) {
-      //console.log(file.src);
-      var numError = 0;
-      function logError(text){
-        if (numError === 0){
-          grunt.log.writeln('\n'+file + ': Lines: ' + contents.length);
-        }
-        grunt.log.errorlns(text);
-        numError++;
+    requiredFunctions.forEach(function(item){
+      if (typeof tabObject[item] === 'undefined'){
+        throw 'tabHandlerService tabObject error: ' + item +
+          ' function is not defined, but mandatory.';
       }
 
-      var keywords = {
-        'angular.': -1,
-        '.module' :-1,
-        '.factory': -1
-      };
-      var content = grunt.file.read(file);
-      var contents = content.split('\n');
-      
-      for (var i = 0, ii=contents.length; i<ii; i+=1){
-        for (var x in keywords){
-          var searchString = contents[i].replace(/('.*')/ig,'').replace(/ /ig,'');
-          var keywordPosition = searchString.indexOf(x);
-
-          if (keywordPosition> -1 && i > keywords[x]){
-            keywords[x] = i;
-          }
-        }
+      if (getType.toString.call(tabObject[item]) !== '[object Function]'){
+        throw 'tabHandlerService tabObject error: ' + item +
+          ' is available, but not a function';
       }
-
-      //
-      if (keywords['angular.']>-1){
-        ['.module', '.factory'].forEach(function(keyword){
-          if (keywords[keyword] > -1 && 
-             (keywords[keyword] < keywords['angular.'])){
-            logError('"' + keyword+ '" module definition should be on end of file.');
-            logError(keywords[keyword] + ': ' + contents[keywords[keyword]]);
-          }
-        });
-      }
-
-
-      
     });
+    return true;
+  };
 
-  });
-};
+  tabHandlerService.addDefault = function(tabObject){
+    if (verifyTabObject(tabObject)){
+      defaultHandler = tabObject;
+    }
+  };
+
+  tabHandlerService.register = function(name, tabObject){
+    tabObject = tabObject || defaultHandler;
+    if (verifyTabObject(tabObject)){
+      handler[name] = tabObject;
+    }
+  };
+
+  tabHandlerService.get = function(name){
+    if (typeof handler[name] === 'undefined'){
+      return defaultHandler;
+    } else {
+      return handler[name];
+    }
+  };
+  return tabHandlerService;
+}
+
+/**
+ * module definition
+ */
+angular
+  .module('tabHandlerService', [])
+  .factory('tabHandler', tabHandlerService);

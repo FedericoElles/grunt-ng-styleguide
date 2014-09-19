@@ -56,6 +56,14 @@ module.exports = function (grunt) {
         '.module' :-1,
         '.factory': -1
       };
+
+      var angularModulesFuncs = [
+        'factory',
+        'service',
+        'filter',
+        'directive'
+      ];
+
       var content = grunt.file.read(file);
       var contents = content.split('\n');
       
@@ -124,8 +132,20 @@ module.exports = function (grunt) {
           if (printLine){
             logError(i + ': ' + contents[i]);
           }
+        } //end check naming convention
+
+        //check if factories 
+        if (testString.indexOf('function') > -1){
+          angularModulesFuncs.forEach(function(keyword){
+            if (testString.indexOf('.' + keyword) > -1){
+               logError('Definition of ' + keyword + 
+                 'should reference to a function, not use an annonymous function.');
+               logError(i + ': ' + contents[i]);
+            }
+          });
         }
-      }
+
+      } //end loop all lines
 
       //
       if (keywords['angular.']>-1){
